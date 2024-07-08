@@ -1,17 +1,35 @@
 import os
+import re
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+
+
+#TODO - make sure the duplicate function is actually working
+
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-# IDs of the Google Sheets you want to pull data from
-SHEET_IDS = ["Sheet_IDs"]
 
-# The ID of the master sheet where you want to paste the data
-MASTER_SHEET_ID = "Master_Sheet_ID"
+
+def extract_sheet_id(url):
+    """
+    Extracts the Google Sheets ID from the provided URL.
+    
+    Args:
+        url (str): The URL of the Google Sheet.
+        
+    Returns:
+        str: The extracted Google Sheets ID.
+    """
+    match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", url)
+    if match:
+        return match.group(1)
+    else:
+        raise ValueError("Invalid Google Sheets URL")
+
 
 def get_credentials():
     """Get user credentials for Google Sheets API."""
@@ -57,10 +75,14 @@ def merge_data(existing_data, new_data):
     
     return merged_data
 
-def main():
+def paster(MASTER_SHEET_URL, SHEET_URL):
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
     
+    #convert URL to ID
+    SHEET_IDS = [extract_sheet_id(url) for url in SHEET_URL]
+    MASTER_SHEET_ID = extract_sheet_id(MASTER_SHEET_URL)
+
     # Read existing data from the master sheet
     existing_data = read_sheet(service, MASTER_SHEET_ID, "A1:Z1000")
     if existing_data is None:
@@ -77,5 +99,3 @@ def main():
     write_to_sheet(service, MASTER_SHEET_ID, "Sheet1!A1", all_data)
     print("Data has been successfully consolidated into the master sheet.")
 
-if __name__ == "__main__":
-    main()
