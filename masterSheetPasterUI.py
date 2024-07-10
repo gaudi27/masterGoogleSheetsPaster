@@ -34,7 +34,7 @@ master_url_entry.pack(pady=5)
 
 # Create and place the other sheets URL input
 tk.Label(root, text="Other Google Sheets URLs (one per line):").pack(pady=5)
-sheet_urls_text = tk.Text(root, width=50, height=10)
+sheet_urls_text = tk.Text(root, width=100, height=30)
 sheet_urls_text.pack(pady=5)
 
 # Create and place the consolidate button
@@ -46,4 +46,5 @@ open_master_button.pack(pady=10)
 
 # Start the GUI event loop
 root.mainloop()
+
 
